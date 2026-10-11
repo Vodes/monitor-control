@@ -15,13 +15,13 @@ Refresh changes are temporary. HDR and NVIDIA color-policy persistence are contr
 
 ## Requirements
 
-| Component | Requirement |
-| --- | --- |
-| Monitor control | Windows 11, 64-bit PowerShell 5.1 or 7, local desktop session |
-| HDR | HDR-capable display and Windows/driver support |
+| Component                  | Requirement                                                    |
+| -------------------------- | -------------------------------------------------------------- |
+| Monitor control            | Windows 11, 64-bit PowerShell 5.1 or 7, local desktop session  |
+| HDR                        | HDR-capable display and Windows/driver support                 |
 | Full/Limited range control | Supported NVIDIA output and the installed NVAPI driver library |
-| Stream Deck plugin | Stream Deck 7.5 or later; ordinary keys |
-| Building from source | Node.js 24 or later and pnpm 11.25.0 |
+| Stream Deck plugin         | Stream Deck 7.5 or later; ordinary keys                        |
+| Building from source       | Node.js 24 or later and pnpm 11.25.0                           |
 
 The scripts need no external PowerShell modules. The installed plugin bundles its backend and JavaScript dependencies and uses Stream Deck's Node.js runtime. Administrator elevation is normally unnecessary.
 
@@ -100,6 +100,25 @@ Run these suites from the root in both PowerShell 5.1 and 7, after building:
 ```
 
 Tests simulate setting changes without changing real displays. Read-only native enumeration and the simulated Stream Deck host check require a local Windows desktop; see the [plugin guide](streamdeck-monitor-control/README.md). Hosted CI runs fake-only checks because it has no physical monitors. Actual HDR/rate/range acceptance and physical key use require manual hardware checks.
+
+## Formatting
+
+Prettier formats TypeScript, JavaScript, JSON, HTML, CSS, and Markdown using the root `.prettierrc.json`: two-space indentation, single quotes, and a 140-column print width. Generated files, dependencies, lockfiles, third-party attribution, and workflows are excluded. From `streamdeck-monitor-control`, run:
+
+```powershell
+pnpm format
+pnpm format:check
+```
+
+For PowerShell, use PSScriptAnalyzer 1.25.0 and the root `PSScriptAnalyzerSettings.psd1`. Download the formatter into the ignored `.tools` folder once, then run the helper from the repository root:
+
+```powershell
+Save-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Path .tools -Repository PSGallery
+.\scripts\Format-PowerShell.ps1
+.\scripts\Format-PowerShell.ps1 -Check
+```
+
+The helper also accepts an already installed PSScriptAnalyzer 1.25.0. It formats only project PowerShell sources, uses four-space indentation and CRLF, and refuses to write if code tokens or embedded C# content change beyond line endings. Embedded C# here-strings are preserved; PSScriptAnalyzer does not format C#. Neither formatter requires monitor access, and formatting checks are not part of CI.
 
 ## GitHub builds and releases
 

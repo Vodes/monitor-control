@@ -28,3 +28,12 @@ No routine check applied settings to a real monitor. Installation in the actual 
 - Removed the launch-helper implementation, its five obsolete test groups, related setup documentation, and unused ignore rules.
 - The remaining standalone/backend suite passed all 76 checks in both PowerShell 5.1 and 7 without calling display setters.
 - Rebuilt, validated, and packaged the plugin with the updated documentation and checksum.
+
+## Formatting and readability cleanup
+
+- Added Prettier configuration with a 140-column print width, manual format/check commands, EditorConfig, and PSScriptAnalyzer 1.25.0 settings/helper. CI workflows are unchanged.
+- Both formatter checks passed; the PowerShell helper was verified in PowerShell 5.1 and 7 and checks code tokens and embedded C# before writing.
+- Refactored key rendering, selection settings, preset saving, error reporting, and display-state branches into named helpers and explicit control flow.
+- Strict TypeScript checking, all 29 plugin tests, all 76 standalone/backend checks in each PowerShell version, and both fake-only worker suites passed.
+- Production SDK integration and read-only native enumeration passed. Display readings remained HDR / 239.99 Hz / 10-bit / Full for MPG 322U X24 and SDR / 120 Hz / 8-bit / Full for OMEN 34c.
+- Rebuilt, validated, and packaged the installer and checksum. Routine verification did not change display settings.

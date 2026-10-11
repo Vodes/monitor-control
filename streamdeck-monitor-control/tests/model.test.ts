@@ -1,15 +1,44 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { matchPreset, depthWarnings, validatePresetShape, validateLibraryShape, resolveMonitor, type Monitor, type Preset } from '../src/model.js';
+import {
+  matchPreset,
+  depthWarnings,
+  validatePresetShape,
+  validateLibraryShape,
+  resolveMonitor,
+  type Monitor,
+  type Preset,
+} from '../src/model.js';
 import { presetView, statusView, escapeXml } from '../src/render.js';
 export const monitor: Monitor = {
-  MonitorId: 'display-id', MonitorName: 'Test <Panel>', Width: 3840, Height: 2160,
-  RefreshRateHz: 60000 / 1001, PhysicalRefreshRateHz: 60000 / 1001, WindowsDynamicRefreshRate: false,
-  HdrEnabled: true, HdrActive: true, ColorMode: 'HDR', ColorRange: 'Full', ColorRangePolicy: 'User', ColorEncoding: 'RGB',
-  BitsPerColorChannel: 10, WindowsBitsPerColorChannel: 10, NvidiaOutputBitsPerColorChannel: 10,
-  ColorDepthReadingsAgree: true, VariableRefreshRateActive: null
+  MonitorId: 'display-id',
+  MonitorName: 'Test <Panel>',
+  Width: 3840,
+  Height: 2160,
+  RefreshRateHz: 60000 / 1001,
+  PhysicalRefreshRateHz: 60000 / 1001,
+  WindowsDynamicRefreshRate: false,
+  HdrEnabled: true,
+  HdrActive: true,
+  ColorMode: 'HDR',
+  ColorRange: 'Full',
+  ColorRangePolicy: 'User',
+  ColorEncoding: 'RGB',
+  BitsPerColorChannel: 10,
+  WindowsBitsPerColorChannel: 10,
+  NvidiaOutputBitsPerColorChannel: 10,
+  ColorDepthReadingsAgree: true,
+  VariableRefreshRateActive: null,
 };
-export const preset: Preset = { id: 'preset-id', name: 'HDR 60', monitorId: 'display-id', hdr: 'On', refreshRate: '60000/1001', rateHz: 60000 / 1001, colorRange: 'Full' };
+export const preset: Preset = {
+  id: 'preset-id',
+  name: 'HDR 60',
+  monitorId: 'display-id',
+  hdr: 'On',
+  refreshRate: '60000/1001',
+  rateHz: 60000 / 1001,
+  colorRange: 'Full',
+};
 test('name selectors survive device ID changes, match exactly, and reject ambiguity', () => {
   const selector = { monitorName: 'test <panel>' };
   assert.equal(resolveMonitor([monitor], selector).monitor, monitor);
@@ -24,7 +53,10 @@ test('name selectors survive device ID changes, match exactly, and reject ambigu
 });
 test('libraries accept name selectors and legacy IDs, but reject missing or mixed selectors', () => {
   const named = { ...preset, monitorId: undefined, monitorName: monitor.MonitorName };
-  const library = validateLibraryShape({ version: 1, presets: [preset, { ...named, id: 'named' }] });
+  const library = validateLibraryShape({
+    version: 1,
+    presets: [preset, { ...named, id: 'named' }],
+  });
   assert.equal(library.presets[1].monitorName, monitor.MonitorName);
   assert.equal('monitorId' in library.presets[1], false);
   assert.throws(() => validatePresetShape({ ...preset, monitorName: monitor.MonitorName }), /exactly one/);
@@ -33,8 +65,8 @@ test('libraries accept name selectors and legacy IDs, but reject missing or mixe
 });
 test('exact fractions match both physical/path readings, with tolerance', () => {
   assert.equal(matchPreset(preset, monitor), 'active');
-  assert.equal(matchPreset(preset, { ...monitor, RefreshRateHz: preset.rateHz! + .009 }), 'active');
-  assert.equal(matchPreset(preset, { ...monitor, RefreshRateHz: preset.rateHz! + .011 }), 'inactive');
+  assert.equal(matchPreset(preset, { ...monitor, RefreshRateHz: preset.rateHz! + 0.009 }), 'active');
+  assert.equal(matchPreset(preset, { ...monitor, RefreshRateHz: preset.rateHz! + 0.011 }), 'inactive');
   assert.equal(matchPreset(preset, { ...monitor, PhysicalRefreshRateHz: 120 }), 'inactive');
   assert.equal(matchPreset(preset, { ...monitor, WindowsDynamicRefreshRate: true }), 'inactive');
 });
@@ -55,13 +87,30 @@ test('depth is best effort, and VRR unknown does not affect matching', () => {
   const low = { ...monitor, WindowsBitsPerColorChannel: 8, ColorDepthReadingsAgree: false };
   assert.equal(matchPreset(preset, low), 'active');
   assert.equal(depthWarnings(low).length, 2);
-  assert.equal(depthWarnings({ ...monitor, HdrActive: false, WindowsBitsPerColorChannel: 8, NvidiaOutputBitsPerColorChannel: 8 }).length, 0);
+  assert.equal(
+    depthWarnings({
+      ...monitor,
+      HdrActive: false,
+      WindowsBitsPerColorChannel: 8,
+      NvidiaOutputBitsPerColorChannel: 8,
+    }).length,
+    0,
+  );
   assert.equal(depthWarnings({ ...monitor, WindowsBitsPerColorChannel: null }).length, 1);
   assert.equal(monitor.VariableRefreshRateActive, null);
 });
 test('library shape validates input, rejects no-ops, preserves stable IDs', () => {
   assert.equal(validatePresetShape(preset).id, preset.id);
-  assert.throws(() => validatePresetShape({ ...preset, hdr: undefined, refreshRate: undefined, colorRange: 'Keep' }), /no changes/);
+  assert.throws(
+    () =>
+      validatePresetShape({
+        ...preset,
+        hdr: undefined,
+        refreshRate: undefined,
+        colorRange: 'Keep',
+      }),
+    /no changes/,
+  );
   assert.throws(() => validatePresetShape({ ...preset, colorRange: 'AutoFull' }), /range/);
   assert.throws(() => validatePresetShape({ ...preset, name: '\n' }), /name/);
   assert.throws(() => validateLibraryShape({ version: 1, presets: [preset, preset] }), /unique/);

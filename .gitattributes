@@ -1,10 +1,13 @@
 * text=auto
 *.ps1 text eol=crlf
+*.psd1 text eol=crlf
 *.yml text eol=lf
 *.yaml text eol=lf
 *.mjs text eol=lf
 *.ts text eol=lf
 *.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
 *.json text eol=lf
 *.md text eol=lf
 *.png binary

@@ -1,0 +1,10 @@
+.git/
+.github/
+.tools/
+.pnpm-store/
+**/node_modules/
+**/pw.vodes.monitorcontrol.sdPlugin/
+**/dist/
+**/pnpm-lock.yaml
+**/*.log
+NVIDIA-NVAPI-NOTICE.md

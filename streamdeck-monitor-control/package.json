@@ -5,9 +5,13 @@
   "author": "Vodes",
   "license": "MIT",
   "packageManager": "pnpm@11.25.0",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "scripts": {
+    "format": "prettier --write .. --ignore-unknown --ignore-path ../.prettierignore",
+    "format:check": "prettier --check .. --ignore-unknown --ignore-path ../.prettierignore",
     "check": "tsc --noEmit",
     "check:version": "node scripts/check-version.mjs",
     "build": "node scripts/build.mjs",
@@ -16,11 +20,14 @@
     "package": "streamdeck pack pw.vodes.monitorcontrol.sdPlugin --output dist --force --no-file-list --no-update-check",
     "checksum": "node scripts/checksum.mjs"
   },
-  "dependencies": { "@elgato/streamdeck": "3.0.0" },
+  "dependencies": {
+    "@elgato/streamdeck": "3.0.0"
+  },
   "devDependencies": {
     "@elgato/cli": "1.10.2",
     "@types/node": "^24.0.0",
     "esbuild": "^0.25.0",
+    "prettier": "^3.9.10",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
   }

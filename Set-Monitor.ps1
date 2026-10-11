@@ -955,7 +955,8 @@ function Initialize-MonitorInterop {
     }
     if (-not ('MonitorControl.NativeBackend' -as [type])) {
         Add-Type -TypeDefinition $script:MonitorInteropSource -ErrorAction Stop
-    } elseif (-not [MonitorControl.NativeBackend].GetField('InteropVersion') -or [MonitorControl.NativeBackend].GetField('InteropVersion').GetValue($null) -ne 6) {
+    }
+    elseif (-not [MonitorControl.NativeBackend].GetField('InteropVersion') -or [MonitorControl.NativeBackend].GetField('InteropVersion').GetValue($null) -ne 6) {
         throw 'An older version of the monitor interop is loaded. Start a fresh PowerShell session to use the updated script.'
     }
     [MonitorControl.NativeBackend]::ValidateLayouts()
@@ -966,7 +967,9 @@ function Write-MonitorLog {
     if (-not [string]::IsNullOrWhiteSpace($Path)) {
         $fullPath = [IO.Path]::GetFullPath($Path)
         $directory = [IO.Path]::GetDirectoryName($fullPath)
-        if (-not [IO.Directory]::Exists($directory)) { [void][IO.Directory]::CreateDirectory($directory) }
+        if (-not [IO.Directory]::Exists($directory)) {
+            [void][IO.Directory]::CreateDirectory($directory)
+        }
         $line = '{0} [{1}] {2}{3}' -f [DateTimeOffset]::Now.ToString('o'), $Level, $Message, [Environment]::NewLine
         [IO.File]::AppendAllText($fullPath, $line, [Text.UTF8Encoding]::new($false))
     }
@@ -982,7 +985,19 @@ function ConvertTo-MonitorStatus {
         Height = $Monitor.Height
         PositionX = $Monitor.X
         PositionY = $Monitor.Y
-        RotationDegrees = $(switch ($Monitor.Rotation) { 1 { 0 }; 2 { 90 }; 3 { 180 }; 4 { 270 }; default { $null } })
+        RotationDegrees = $(switch ($Monitor.Rotation) {
+                1 {
+                    0
+                }; 2 {
+                    90
+                }; 3 {
+                    180
+                }; 4 {
+                    270
+                }; default {
+                    $null
+                }
+            })
         RefreshRateHz = $Monitor.RefreshRateHz
         RefreshRateFraction = $Monitor.RefreshRateFraction
         PhysicalRefreshRateHz = $Monitor.PhysicalRefreshRateHz
@@ -1009,7 +1024,20 @@ function ConvertTo-MonitorStatus {
         ColorRange = $Monitor.ColorRange
         ColorRangeSource = $Monitor.ColorRangeSource
         ColorRangeEnforcedByAction = $Monitor.ColorRangeEnforcedByAction
-        ColorRangePolicy = $(if ($null -ne $Monitor.NvidiaColorState) { switch ($Monitor.NvidiaColorState.Policy) { 0 { 'User' }; 1 { 'BestQuality' }; default { 'Unknown' } } } else { 'Unknown' })
+        ColorRangePolicy = $(if ($null -ne $Monitor.NvidiaColorState) {
+                switch ($Monitor.NvidiaColorState.Policy) {
+                    0 {
+                        'User'
+                    }; 1 {
+                        'BestQuality'
+                    }; default {
+                        'Unknown'
+                    }
+                }
+            }
+            else {
+                'Unknown'
+            })
         ColorRangeUnavailableReason = $Monitor.ColorRangeUnavailableReason
         BitsPerColorChannel = $Monitor.BitsPerColorChannel
         WindowsBitsPerColorChannel = $Monitor.BitsPerColorChannel
@@ -1032,13 +1060,20 @@ function Invoke-MonitorCommand {
         if ($hasName -or $hasId -or $hasHdr -or $hasRate -or $hasColor -or $Arguments['ListRefreshRates']) {
             throw '-ListMonitors cannot be combined with a monitor selector, setting changes, or -ListRefreshRates.'
         }
-    } else {
-        if ($hasName -eq $hasId) { throw 'Supply exactly one of -MonitorName or -MonitorId (or use -ListMonitors).' }
-        if ($Arguments['ListRefreshRates'] -and ($hasHdr -or $hasRate -or $hasColor)) { throw '-ListRefreshRates cannot be combined with setting changes.' }
+    }
+    else {
+        if ($hasName -eq $hasId) {
+            throw 'Supply exactly one of -MonitorName or -MonitorId (or use -ListMonitors).'
+        }
+        if ($Arguments['ListRefreshRates'] -and ($hasHdr -or $hasRate -or $hasColor)) {
+            throw '-ListRefreshRates cannot be combined with setting changes.'
+        }
     }
     Initialize-MonitorInterop
     $rate = $null
-    if ($hasRate) { $rate = [MonitorControl.Rate]::Parse($Arguments['RefreshRate']) }
+    if ($hasRate) {
+        $rate = [MonitorControl.Rate]::Parse($Arguments['RefreshRate'])
+    }
     $backend = [MonitorControl.NativeBackend]::new(-not [bool]$Arguments['NoNvidiaApi'])
     if ($Arguments['ListMonitors']) {
         $backend.Capture().Monitors | ForEach-Object { ConvertTo-MonitorStatus $_ }
@@ -1047,33 +1082,85 @@ function Invoke-MonitorCommand {
     $selected = [MonitorControl.Selection]::Resolve($backend.Capture().Monitors, $Arguments['MonitorName'], $Arguments['MonitorId'])
     if ($Arguments['ListRefreshRates']) {
         $rates = @($backend.ListRates($selected.MonitorId))
-        if ($rates.Count -eq 0) { Write-Warning 'DXGI exposed no matching modes at the current signal resolution and scan mode. A custom rate can still be validated by Windows.' }
+        if ($rates.Count -eq 0) {
+            Write-Warning 'DXGI exposed no matching modes at the current signal resolution and scan mode. A custom rate can still be validated by Windows.'
+        }
         $rates
         return
     }
-    if (-not $hasHdr -and -not $hasRate -and (-not $hasColor -or $Arguments['ColorRange'] -eq 'Keep')) { ConvertTo-MonitorStatus $selected; return }
-    $desiredRange = if ($hasColor) { switch ($Arguments['ColorRange']) { 'Full' { 'Full' }; 'Limited' { 'Limited' } } } else { 'AutoFull' }
-    $action = 'Apply temporary refresh rate {0}; HDR {1}; output range {2}' -f $(if ($hasRate) { $rate.ToString() + ' Hz' } else { 'unchanged' }), $(if ($hasHdr) { $Arguments['Hdr'] } else { 'unchanged' }), $(if ($desiredRange -eq 'AutoFull') { 'Full on supported NVIDIA outputs' } elseif ($desiredRange) { $desiredRange } else { 'driver-selected' })
-    if ($desiredRange -and ($hasHdr -or $hasRate)) { $action += '; NVIDIA output depth prefer 10-bit HDR / 8-bit SDR' }
-    if (-not $Caller.ShouldProcess($selected.MonitorName + ' [' + $selected.MonitorId + ']', $action)) { return }
+    if (-not $hasHdr -and -not $hasRate -and (-not $hasColor -or $Arguments['ColorRange'] -eq 'Keep')) {
+        ConvertTo-MonitorStatus $selected; return
+    }
+    $desiredRange = if ($hasColor) {
+        switch ($Arguments['ColorRange']) {
+            'Full' {
+                'Full'
+            }; 'Limited' {
+                'Limited'
+            }
+        }
+    }
+    else {
+        'AutoFull'
+    }
+    $action = 'Apply temporary refresh rate {0}; HDR {1}; output range {2}' -f $(if ($hasRate) {
+            $rate.ToString() + ' Hz'
+        }
+        else {
+            'unchanged'
+        }), $(if ($hasHdr) {
+            $Arguments['Hdr']
+        }
+        else {
+            'unchanged'
+        }), $(if ($desiredRange -eq 'AutoFull') {
+            'Full on supported NVIDIA outputs'
+        }
+        elseif ($desiredRange) {
+            $desiredRange
+        }
+        else {
+            'driver-selected'
+        })
+    if ($desiredRange -and ($hasHdr -or $hasRate)) {
+        $action += '; NVIDIA output depth prefer 10-bit HDR / 8-bit SDR'
+    }
+    if (-not $Caller.ShouldProcess($selected.MonitorName + ' [' + $selected.MonitorId + ']', $action)) {
+        return
+    }
     $mutex = [Threading.Mutex]::new($false, 'Local\MonitorControl.DisplaySettings.v1')
     $locked = $false
     try {
-        try { $locked = $mutex.WaitOne(30000) } catch [Threading.AbandonedMutexException] { $locked = $true }
-        if (-not $locked) { throw 'Another monitor action is still running; timed out after 30 seconds.' }
+        try {
+            $locked = $mutex.WaitOne(30000)
+        }
+        catch [Threading.AbandonedMutexException] {
+            $locked = $true
+        }
+        if (-not $locked) {
+            throw 'Another monitor action is still running; timed out after 30 seconds.'
+        }
         # Resolve again after waiting: do not target an outdated name/connection.
         $selected = [MonitorControl.Selection]::Resolve($backend.Capture().Monitors, $Arguments['MonitorName'], $Arguments['MonitorId'])
         $desiredHdr = $null
-        if ($hasHdr) { $desiredHdr = $Arguments['Hdr'] -eq 'On' }
+        if ($hasHdr) {
+            $desiredHdr = $Arguments['Hdr'] -eq 'On'
+        }
         Write-MonitorLog $Arguments['LogPath'] 'START' ($selected.MonitorName + ': ' + $action)
         $controller = [MonitorControl.Controller]::new($backend)
         try {
             $result = $controller.Apply($selected.MonitorId, $desiredHdr, $rate, $desiredRange)
-        } finally {
+        }
+        finally {
             if (-not [string]::IsNullOrWhiteSpace($Arguments['LogPath'])) {
                 try {
-                    foreach ($entry in $controller.Diagnostics) { Write-MonitorLog $Arguments['LogPath'] 'DIAGNOSTIC' $entry }
-                } catch { Write-Warning ('Cannot write diagnostic log: ' + $_.Exception.Message) }
+                    foreach ($entry in $controller.Diagnostics) {
+                        Write-MonitorLog $Arguments['LogPath'] 'DIAGNOSTIC' $entry
+                    }
+                }
+                catch {
+                    Write-Warning ('Cannot write diagnostic log: ' + $_.Exception.Message)
+                }
             }
         }
         if ($result.ColorModeTransitionNote) {
@@ -1085,26 +1172,43 @@ function Invoke-MonitorCommand {
             Write-MonitorLog $Arguments['LogPath'] 'WARNING' $warning
             Write-Warning $warning
         }
-        $expectedBits = if ($result.HdrActive -eq $true) { 10 } elseif ($result.HdrActive -eq $false) { 8 } else { $null }
+        $expectedBits = if ($result.HdrActive -eq $true) {
+            10
+        }
+        elseif ($result.HdrActive -eq $false) {
+            8
+        }
+        else {
+            $null
+        }
         if ($null -eq $result.BitsPerColorChannel -or $null -eq $expectedBits) {
             $warning = 'Windows did not report enough information to verify output color depth.'
             Write-MonitorLog $Arguments['LogPath'] 'WARNING' $warning
             Write-Warning $warning
-        } elseif ($result.BitsPerColorChannel -ne $expectedBits) {
+        }
+        elseif ($result.BitsPerColorChannel -ne $expectedBits) {
             $warning = 'Output has {0} bits per color channel; expected {1} for the current HDR state.' -f $result.BitsPerColorChannel, $expectedBits
             Write-MonitorLog $Arguments['LogPath'] 'WARNING' $warning
             Write-Warning $warning
         }
         if ($result.ColorDepthFallbackReason -or $result.ColorDepthReadingsAgree -eq $false) {
-            $warning = if ($result.ColorDepthFallbackReason) { $result.ColorDepthFallbackReason } else { 'Output-depth readings disagree: Windows={0}, NVIDIA={1}. Neither reading is hidden.' -f $result.BitsPerColorChannel, $result.NvidiaOutputBitsPerColorChannel }
+            $warning = if ($result.ColorDepthFallbackReason) {
+                $result.ColorDepthFallbackReason
+            }
+            else {
+                'Output-depth readings disagree: Windows={0}, NVIDIA={1}. Neither reading is hidden.' -f $result.BitsPerColorChannel, $result.NvidiaOutputBitsPerColorChannel
+            }
             Write-MonitorLog $Arguments['LogPath'] 'WARNING' $warning
             Write-Warning $warning
         }
         $status = ConvertTo-MonitorStatus $result
         Write-MonitorLog $Arguments['LogPath'] 'SUCCESS' ($status | ConvertTo-Json -Compress)
         $status
-    } finally {
-        if ($locked) { $mutex.ReleaseMutex() }
+    }
+    finally {
+        if ($locked) {
+            $mutex.ReleaseMutex()
+        }
         $mutex.Dispose()
     }
 }
@@ -1113,11 +1217,19 @@ function Invoke-MonitorCommand {
 if ($MyInvocation.InvocationName -ne '.') {
     try {
         Invoke-MonitorCommand -Arguments $PSBoundParameters -Caller $PSCmdlet
-    } catch {
+    }
+    catch {
         $failureMessage = $_.Exception.GetBaseException().Message
         # Preserve the outer exception's restoration report rather than only its original cause.
-        if ($_.Exception.Message -match 'restored|RESTORATION FAILED') { $failureMessage = $_.Exception.Message }
-        try { Write-MonitorLog $LogPath 'ERROR' $failureMessage } catch { Write-Warning ('Cannot write log: ' + $_.Exception.Message) }
+        if ($_.Exception.Message -match 'restored|RESTORATION FAILED') {
+            $failureMessage = $_.Exception.Message
+        }
+        try {
+            Write-MonitorLog $LogPath 'ERROR' $failureMessage
+        }
+        catch {
+            Write-Warning ('Cannot write log: ' + $_.Exception.Message)
+        }
         Write-Error -Message $failureMessage -ErrorAction Continue
         exit 1
     }

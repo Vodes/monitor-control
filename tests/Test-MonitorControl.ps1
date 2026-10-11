@@ -6,9 +6,16 @@ $root = Split-Path $PSScriptRoot -Parent
 # Add-Type names are cached by PowerShell. If the user already ran the main
 # script, isolate compilation of the production source + fake backend.
 if ('MonitorControl.NativeBackend' -as [type]) {
-    $testHost = if ($PSVersionTable.PSVersion.Major -ge 6) { Join-Path $PSHOME 'pwsh.exe' } else { Join-Path $PSHOME 'powershell.exe' }
+    $testHost = if ($PSVersionTable.PSVersion.Major -ge 6) {
+        Join-Path $PSHOME 'pwsh.exe'
+    }
+    else {
+        Join-Path $PSHOME 'powershell.exe'
+    }
     & $testHost -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File $PSCommandPath
-    if ($LASTEXITCODE -ne 0) { throw 'The isolated test process failed.' }
+    if ($LASTEXITCODE -ne 0) {
+        throw 'The isolated test process failed.'
+    }
     return
 }
 . (Join-Path $root 'Set-Monitor.ps1')
@@ -584,39 +591,60 @@ if ($status.RotationDegrees -ne 0 -or $status.RefreshRateFraction -ne '60/1' -or
     $status.BitsPerColorChannel -ne 8 -or $status.ColorRange -ne 'Full' -or $status.ColorRangePolicy -ne 'BestQuality' -or
     $status.WindowsBitsPerColorChannel -ne 8 -or $status.NvidiaOutputBitsPerColorChannel -ne 8 -or $status.ColorDepthReadingsAgree -ne $true -or
     $status.WindowsDynamicRefreshRate -ne $false -or $null -ne $status.VariableRefreshRateActive -or $status.PSObject.Properties.Name -contains 'PathIndex' -or
-    $status.PSObject.Properties.Name -contains 'SourceKey') { throw 'Status output contains wrong/missing fields.' }
+    $status.PSObject.Properties.Name -contains 'SourceKey') {
+    throw 'Status output contains wrong/missing fields.'
+}
 $passed += 'Structured status contains display settings rather than backend indexes'
 
 foreach ($invalidArguments in @(
-    @{},
-    @{ MonitorName = 'Panel'; MonitorId = 'id' },
-    @{ ListMonitors = $true; MonitorName = 'Panel' },
-    @{ MonitorName = 'Panel'; ListRefreshRates = $true; Hdr = 'On' },
-    @{ ListMonitors = $true; ColorRange = 'Full' },
-    @{ MonitorName = 'Panel'; ListRefreshRates = $true; ColorRange = 'Full' }
-)) {
+        @{},
+        @{ MonitorName = 'Panel'; MonitorId = 'id' },
+        @{ ListMonitors = $true; MonitorName = 'Panel' },
+        @{ MonitorName = 'Panel'; ListRefreshRates = $true; Hdr = 'On' },
+        @{ ListMonitors = $true; ColorRange = 'Full' },
+        @{ MonitorName = 'Panel'; ListRefreshRates = $true; ColorRange = 'Full' }
+    )) {
     $rejected = $false
-    try { Invoke-MonitorCommand -Arguments $invalidArguments -Caller $null } catch { $rejected = $true }
-    if (-not $rejected) { throw 'Invalid CLI argument combination accepted.' }
+    try {
+        Invoke-MonitorCommand -Arguments $invalidArguments -Caller $null
+    }
+    catch {
+        $rejected = $true
+    }
+    if (-not $rejected) {
+        throw 'Invalid CLI argument combination accepted.'
+    }
 }
 $passed += 'Invalid CLI combinations rejected before display access'
 
 $fakeBackend = [MonitorControl.Tests.FakeBackend]::new()
 $controller = [MonitorControl.Controller]::new($fakeBackend)
 $result = $controller.Apply('id0', $true, [MonitorControl.Rate]::Parse('59.94'))
-if ($result.HdrActive -ne $true -or $result.RefreshRateFraction -ne '2997/50') { throw 'PowerShell nullable argument binding failed for combined settings.' }
+if ($result.HdrActive -ne $true -or $result.RefreshRateFraction -ne '2997/50') {
+    throw 'PowerShell nullable argument binding failed for combined settings.'
+}
 $result = $controller.Apply('id0', $null, [MonitorControl.Rate]::Parse('120'))
-if ($result.HdrActive -ne $true -or $result.RefreshRateHz -ne 120) { throw 'PowerShell nullable HDR binding failed.' }
+if ($result.HdrActive -ne $true -or $result.RefreshRateHz -ne 120) {
+    throw 'PowerShell nullable HDR binding failed.'
+}
 $result = $controller.Apply('id0', $false, $null)
-if ($result.HdrActive -ne $false -or $result.RefreshRateHz -ne 120) { throw 'PowerShell nullable rate binding failed.' }
+if ($result.HdrActive -ne $false -or $result.RefreshRateHz -ne 120) {
+    throw 'PowerShell nullable rate binding failed.'
+}
 $passed += 'PowerShell calls bind combined, HDR-only, and rate-only nullable arguments'
 $result = $controller.Apply('id0', $null, $null, 'Full')
-if ($result.ColorRange -ne 'Full' -or $result.NvidiaColorState.Policy -ne 0) { throw 'PowerShell range-only binding failed.' }
+if ($result.ColorRange -ne 'Full' -or $result.NvidiaColorState.Policy -ne 0) {
+    throw 'PowerShell range-only binding failed.'
+}
 $result = $controller.Apply('id0', $true, [MonitorControl.Rate]::Parse('120'), 'AutoFull')
-if ($result.ColorRange -ne 'Full' -or $result.HdrActive -ne $true) { throw 'PowerShell automatic range binding failed.' }
+if ($result.ColorRange -ne 'Full' -or $result.HdrActive -ne $true) {
+    throw 'PowerShell automatic range binding failed.'
+}
 $eventCount = $fakeBackend.Events.Count
 $result = $controller.Apply('id0', $null, $null, $null)
-if ($fakeBackend.Events.Count -ne $eventCount -or $result.ColorRangeEnforcedByAction) { throw 'PowerShell null range binding failed.' }
+if ($fakeBackend.Events.Count -ne $eventCount -or $result.ColorRangeEnforcedByAction) {
+    throw 'PowerShell null range binding failed.'
+}
 $passed += 'PowerShell calls bind range-only and automatic Full arguments'
 
 Write-Output ('PASS: {0} checks; no display setters were called.' -f $passed.Count)

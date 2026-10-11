@@ -1,5 +1,6 @@
 # Dependencies and generated plugin/installers.
 node_modules/
+.tools/
 .pnpm-store/
 streamdeck-monitor-control/pw.vodes.monitorcontrol.sdPlugin/
 streamdeck-monitor-control/dist/

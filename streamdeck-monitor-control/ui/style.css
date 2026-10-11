@@ -1,26 +1,142 @@
-:root { color-scheme: dark; font: 12px 'Segoe UI', sans-serif; color: #e4ebf4; background: #202127; }
-* { box-sizing: border-box; }
-body { margin: 0; padding: 16px 14px; max-width: 540px; }
-header { margin-bottom: 15px; }
-.eyebrow { font-size: 10px; letter-spacing: 1.5px; color: #60dcb5; }
-h1 { font-size: 23px; margin: 5px 0; font-weight: 600; }
-p, footer { color: #aab5c5; line-height: 1.55; }
-section, details { border: 1px solid #394351; border-radius: 7px; padding: 12px; margin: 12px 0; background: #252a32; }
-summary { cursor: pointer; font-weight: 600; }
-label { display: block; margin: 12px 0 5px; color: #d2dce8; }
-input, select, textarea { width: 100%; border: 1px solid #4a586c; border-radius: 4px; padding: 8px; background: #171f2a; color: #e4ebf4; font: inherit; }
-input:focus, select:focus, textarea:focus, button:focus { outline: 2px solid #60dcb5; outline-offset: 1px; }
-button, .fileButton { cursor: pointer; border: 1px solid #506077; border-radius: 4px; background: #354357; color: #ecf3ff; padding: 8px 10px; font: inherit; margin-top: 9px; }
-button:disabled { cursor: wait; opacity: .55; }
-.primary { background: #265649; border-color: #60dcb5; width: 100%; }
-.danger { color: #ffb5be; }
-.subtle { width: 100%; background: transparent; }
-.buttons { display: flex; gap: 6px; flex-wrap: wrap; }
-.fileButton { display: inline-block; margin-bottom: 0; }
-.fileButton input { display: none; }
-.hint { font-size: 11px; margin: 6px 0; }
-#notice { padding: 8px 10px; border-left: 3px solid #60dcb5; background: #273931; overflow-wrap: anywhere; }
-#notice.error { border-color: #ff7185; background: #412b33; }
-.live { border-top: 1px solid #394351; padding-top: 10px; margin-top: 12px; line-height: 1.7; white-space: pre-wrap; }
-pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.6 Consolas, monospace; max-height: 420px; overflow-y: auto; }
-footer { font-size: 10px; margin-top: 15px; }
+:root {
+  color-scheme: dark;
+  font:
+    12px 'Segoe UI',
+    sans-serif;
+  color: #e4ebf4;
+  background: #202127;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 16px 14px;
+  max-width: 540px;
+}
+header {
+  margin-bottom: 15px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #60dcb5;
+}
+h1 {
+  font-size: 23px;
+  margin: 5px 0;
+  font-weight: 600;
+}
+p,
+footer {
+  color: #aab5c5;
+  line-height: 1.55;
+}
+section,
+details {
+  border: 1px solid #394351;
+  border-radius: 7px;
+  padding: 12px;
+  margin: 12px 0;
+  background: #252a32;
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+label {
+  display: block;
+  margin: 12px 0 5px;
+  color: #d2dce8;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #4a586c;
+  border-radius: 4px;
+  padding: 8px;
+  background: #171f2a;
+  color: #e4ebf4;
+  font: inherit;
+}
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  outline: 2px solid #60dcb5;
+  outline-offset: 1px;
+}
+button,
+.fileButton {
+  cursor: pointer;
+  border: 1px solid #506077;
+  border-radius: 4px;
+  background: #354357;
+  color: #ecf3ff;
+  padding: 8px 10px;
+  font: inherit;
+  margin-top: 9px;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+.primary {
+  background: #265649;
+  border-color: #60dcb5;
+  width: 100%;
+}
+.danger {
+  color: #ffb5be;
+}
+.subtle {
+  width: 100%;
+  background: transparent;
+}
+.buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.fileButton {
+  display: inline-block;
+  margin-bottom: 0;
+}
+.fileButton input {
+  display: none;
+}
+.hint {
+  font-size: 11px;
+  margin: 6px 0;
+}
+#notice {
+  padding: 8px 10px;
+  border-left: 3px solid #60dcb5;
+  background: #273931;
+  overflow-wrap: anywhere;
+}
+#notice.error {
+  border-color: #ff7185;
+  background: #412b33;
+}
+.live {
+  border-top: 1px solid #394351;
+  padding-top: 10px;
+  margin-top: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    11px/1.6 Consolas,
+    monospace;
+  max-height: 420px;
+  overflow-y: auto;
+}
+footer {
+  font-size: 10px;
+  margin-top: 15px;
+}

@@ -6,8 +6,9 @@ export function verifyVersion(packageVersion, manifestVersion, tag = '') {
   if (typeof packageVersion !== 'string' || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(packageVersion)) {
     throw new Error('Package version must be MAJOR.MINOR.PATCH, without prerelease suffixes.');
   }
-  if (packageVersion.split('.').some(part => Number(part) > 65535)) throw new Error('Version components must be at most 65535.');
-  if (manifestVersion !== `${packageVersion}.0`) throw new Error(`Manifest Version must be ${packageVersion}.0; received ${manifestVersion}.`);
+  if (packageVersion.split('.').some((part) => Number(part) > 65535)) throw new Error('Version components must be at most 65535.');
+  if (manifestVersion !== `${packageVersion}.0`)
+    throw new Error(`Manifest Version must be ${packageVersion}.0; received ${manifestVersion}.`);
   if (tag && tag !== `v${packageVersion}`) throw new Error(`Release tag must be v${packageVersion}; received ${tag}.`);
   return packageVersion;
 }
