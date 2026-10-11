@@ -1,0 +1,4 @@
+node_modules/
+pw.vodes.monitorcontrol.sdPlugin/
+dist/
+*.log

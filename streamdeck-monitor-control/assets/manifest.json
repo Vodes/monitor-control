@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "pw.vodes.monitorcontrol",
+  "Name": "Monitor Control",
+  "Author": "Vodes",
+  "Description": "Verified HDR, refresh-rate and color-range presets with live monitor feedback.",
+  "Version": "1.0.0.0",
+  "SDKVersion": 3,
+  "CodePath": "bin/plugin.js",
+  "Nodejs": { "Version": "24" },
+  "Software": { "MinimumVersion": "7.5" },
+  "OS": [{ "Platform": "windows", "MinimumVersion": "10" }],
+  "Icon": "imgs/plugin",
+  "Category": "Monitor Control",
+  "CategoryIcon": "imgs/category",
+  "Actions": [
+    {
+      "UUID": "pw.vodes.monitorcontrol.preset",
+      "Name": "Apply Preset",
+      "Tooltip": "Apply a monitor preset; a checkmark reflects actual settings.",
+      "Icon": "imgs/preset",
+      "Controllers": ["Keypad"],
+      "DisableAutomaticStates": true,
+      "SupportedInMultiActions": false,
+      "SupportedInKeyLogicActions": false,
+      "PropertyInspectorPath": "ui/index.html",
+      "States": [{ "Image": "imgs/key", "TitleAlignment": "bottom", "FontSize": 12 }]
+    },
+    {
+      "UUID": "pw.vodes.monitorcontrol.status",
+      "Name": "Monitor Status",
+      "Tooltip": "Show live monitor settings. Press to refresh without applying changes.",
+      "Icon": "imgs/status",
+      "Controllers": ["Keypad"],
+      "DisableAutomaticStates": true,
+      "SupportedInMultiActions": false,
+      "SupportedInKeyLogicActions": false,
+      "PropertyInspectorPath": "ui/index.html",
+      "States": [{ "Image": "imgs/key", "TitleAlignment": "middle", "FontSize": 12 }]
+    }
+  ]
+}

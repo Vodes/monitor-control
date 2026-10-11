@@ -1,0 +1,27 @@
+{
+  "name": "streamdeck-monitor-control",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Vodes",
+  "license": "MIT",
+  "packageManager": "pnpm@11.25.0",
+  "engines": { "node": ">=24" },
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "check:version": "node scripts/check-version.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --import tsx --test tests/*.test.*",
+    "validate": "streamdeck validate pw.vodes.monitorcontrol.sdPlugin --no-update-check",
+    "package": "streamdeck pack pw.vodes.monitorcontrol.sdPlugin --output dist --force --no-file-list --no-update-check",
+    "checksum": "node scripts/checksum.mjs"
+  },
+  "dependencies": { "@elgato/streamdeck": "3.0.0" },
+  "devDependencies": {
+    "@elgato/cli": "1.10.2",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

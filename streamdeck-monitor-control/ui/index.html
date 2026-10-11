@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src ws://127.0.0.1:*; img-src 'self' data:">
+  <title>Monitor Control</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="inspector.js"></script>
+</head>
+<body>
+  <header><span class="eyebrow">MONITOR CONTROL</span><h1>Live presets</h1><p>Verified settings. Feedback from your monitor.</p></header>
+  <div id="notice" role="status">Connecting…</div>
+  <section id="confirmation" hidden><p id="confirmationMessage"></p><div class="buttons"><button id="confirmAction" class="danger">Confirm</button><button id="cancelAction">Cancel</button></div></section>
+  <section>
+    <label id="actionLabel" for="actionSelection">Button preset</label><select id="actionSelection"></select>
+    <button id="refresh" class="subtle">Refresh monitor status</button>
+    <div id="live" class="live">Reading displays…</div>
+  </section>
+  <details id="manager">
+    <summary>Manage shared presets</summary>
+    <p>Edits affect every button using a preset. Saving never changes your display.</p>
+    <label for="editSelection">Edit preset</label><select id="editSelection"></select>
+    <div class="buttons"><button id="new">New</button><button id="duplicate">Duplicate</button><button id="delete" class="danger">Delete</button></div>
+    <label for="name">Preset name</label><input id="name" maxlength="512" placeholder="HDR 240">
+    <label for="monitor">Monitor</label><select id="monitor"></select>
+    <p class="hint">Choose the recommended name entry to survive device ID changes after driver updates. Use a Device ID entry for identical monitor names. Names match exactly, ignoring case; ambiguous names cannot apply a preset.</p>
+    <label for="hdr">HDR</label><select id="hdr"><option value="">Keep current</option><option value="On">On</option><option value="Off">Off</option></select>
+    <label for="rate">Refresh rate</label><input id="rate" list="rates" placeholder="Keep current, or 239.99 / 60000/1001" maxlength="128"><datalist id="rates"></datalist>
+    <p class="hint" id="rateHint">Choose an exposed rate or type positive decimal Hz / a fraction. A custom number requests a timing; it does not create one.</p>
+    <label for="range">Output color range</label><select id="range"><option value="Full">Full (NVIDIA)</option><option value="Limited">Limited (NVIDIA)</option><option value="Keep">Keep / driver-selected</option></select>
+    <p class="hint">Full is the default. HDR actions prefer 10-bit; SDR actions prefer 8-bit. Unsupported depth is reported as a warning.</p>
+    <button id="save" class="primary">Save preset</button>
+  </details>
+  <details>
+    <summary>Backup / import library</summary>
+    <p>Global presets are separate from Stream Deck profile exports. Save a JSON backup here.</p>
+    <div class="buttons"><button id="export">Save backup</button><label class="fileButton">Import file<input type="file" id="importFile" accept=".json,application/json"></label></div>
+    <label for="backup">Library JSON</label><textarea id="backup" rows="7" spellcheck="false"></textarea>
+    <button id="import">Replace library from JSON</button>
+    <p class="hint">Import replaces the library. Matching preset IDs keep existing button references.</p>
+  </details>
+  <details>
+    <summary>Diagnostics</summary>
+    <pre id="details">Waiting for status.</pre>
+    <label for="logPath">Log folder</label><input id="logPath" readonly>
+  </details>
+  <footer>Keep the button's default image and title for live feedback. VRR activity is shown as unknown when it cannot be measured.</footer>
+</body>
+</html>

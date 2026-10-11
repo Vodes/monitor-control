@@ -1,0 +1,8 @@
+# Dependencies and generated plugin/installers.
+node_modules/
+.pnpm-store/
+streamdeck-monitor-control/pw.vodes.monitorcontrol.sdPlugin/
+streamdeck-monitor-control/dist/
+
+# Local monitor diagnostics.
+*.log
